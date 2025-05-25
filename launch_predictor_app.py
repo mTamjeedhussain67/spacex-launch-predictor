@@ -6,7 +6,7 @@ from streamlit_folium import st_folium
 from streamlit_lottie import st_lottie
 import requests
 
-# ---------- Helper Functions ----------
+# Load Data and Model
 @st.cache_resource
 def load_data_and_model():
     df = pd.read_csv("spacex_launch_data.csv")
@@ -27,108 +27,115 @@ def load_lottie_url(url: str):
         return None
     return r.json()
 
-# ---------- Load Resources ----------
+# Load
 df, model = load_data_and_model()
 lottie_rocket = load_lottie_url("https://assets5.lottiefiles.com/packages/lf20_ig8fvpyk.json")
 
-# ---------- Page Config ----------
+# Page Setup
 st.set_page_config(page_title="🚀 SpaceX Launch Predictor", layout="wide")
 
-# ---------- Custom Styling ----------
+# ===== Custom Stylish CSS =====
 st.markdown("""
     <style>
-        body {
-            background-color: #0d1117;
-            color: #c9d1d9;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .main-title {
-            font-size: 3rem;
-            font-weight: 700;
-            color: #58a6ff;
-        }
-        .section-header {
-            font-size: 1.8rem;
-            margin-top: 30px;
-            color: #58a6ff;
-            border-left: 4px solid #58a6ff;
-            padding-left: 10px;
-        }
-        .card {
-            background-color: #161b22;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 30px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-        .metric {
-            font-size: 1.3rem;
-        }
+    html, body, [class*="css"]  {
+        background-color: #0e1117;
+        color: #ffffff;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .main-box {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 30px;
+        margin-top: 30px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        backdrop-filter: blur(8px);
+    }
+    .title-text {
+        font-size: 3em;
+        font-weight: bold;
+        color: #58a6ff;
+    }
+    .sub-heading {
+        font-size: 1.4em;
+        color: #8b949e;
+        margin-bottom: 20px;
+    }
+    .section-title {
+        font-size: 2em;
+        font-weight: 600;
+        border-left: 5px solid #58a6ff;
+        padding-left: 10px;
+        margin-top: 50px;
+        color: #58a6ff;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# ---------- Header Section ----------
-with st.container():
-    col1, col2 = st.columns([1, 3])
-    with col1:
-        st_lottie(lottie_rocket, height=160, speed=1)
-    with col2:
-        st.markdown("<div class='main-title'>🚀 SpaceX Launch Success Predictor</div>", unsafe_allow_html=True)
-        st.markdown("Get instant predictions, browse historical data, and explore launch locations in a sleek, modern dashboard.")
+# ===== Header with Animation =====
+col1, col2 = st.columns([1, 3])
+with col1:
+    st_lottie(lottie_rocket, height=150)
+with col2:
+    st.markdown("<div class='title-text'>🚀 SpaceX Launch Success Predictor</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-heading'>Smart prediction engine + clean dashboard UI = mission control at your fingertips.</div>", unsafe_allow_html=True)
 
-# ---------- Sidebar ----------
-st.sidebar.title("🔍 Menu")
-section = st.sidebar.radio("Navigate to:", ["🚀 Predict", "📊 Data", "🗺️ Map"])
+# ===== Sidebar Navigation =====
+st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/SpaceX-Logo.svg/320px-SpaceX-Logo.svg.png", width=180)
+section = st.sidebar.radio("🔍 Navigate", ["🎯 Predict", "📊 Launch Data", "🗺️ Launch Map"])
 st.sidebar.markdown("---")
-st.sidebar.caption("Made with ❤️ by **Tamjeed Hussain**")
+st.sidebar.caption("Made with ❤️ by Tamjeed Hussain")
 
-# ---------- Prediction Section ----------
-if section == "🚀 Predict":
-    st.markdown("<div class='section-header'>🎯 Predict Launch Outcome</div>", unsafe_allow_html=True)
+# ===== Section 1: Prediction =====
+if section == "🎯 Predict":
+    st.markdown("<div class='section-title'>🎯 Predict Launch Success</div>", unsafe_allow_html=True)
     with st.container():
         with st.form("predict_form"):
-            payload_input = st.slider("Payload Count", 1, 10, 2)
-            submitted = st.form_submit_button("🔮 Predict Now")
+            st.markdown("<div class='main-box'>", unsafe_allow_html=True)
+            payload = st.slider("Select Payload Count", 1, 10, 3)
+            submitted = st.form_submit_button("🚀 Predict")
+            st.markdown("</div>", unsafe_allow_html=True)
+
             if submitted:
-                prediction = model.predict([[payload_input]])
+                prediction = model.predict([[payload]])
                 col1, col2 = st.columns(2)
                 with col1:
                     if prediction[0] == 1:
-                        st.success("✅ Launch likely to be **Successful**!")
+                        st.success("✅ Likely to be **Successful**!")
                     else:
-                        st.error("❌ Launch may **Fail**.")
+                        st.error("❌ Might **Fail**.")
                 with col2:
-                    st.metric("Prediction Result", "Success" if prediction[0] else "Failure")
+                    st.metric("Confidence Level", "High" if prediction[0] else "Low")
 
-# ---------- Launch Data Section ----------
-elif section == "📊 Data":
-    st.markdown("<div class='section-header'>📅 Launch Data Explorer</div>", unsafe_allow_html=True)
+# ===== Section 2: Launch Data =====
+elif section == "📊 Launch Data":
+    st.markdown("<div class='section-title'>📊 SpaceX Launch Records</div>", unsafe_allow_html=True)
     df['date_utc'] = pd.to_datetime(df['date_utc'])
+    years = sorted(df['date_utc'].dt.year.unique())
 
-    with st.container():
-        years = sorted(df['date_utc'].dt.year.unique())
-        col1, col2 = st.columns(2)
-        selected_year = col1.selectbox("Choose Year", years)
-        selected_site = col2.selectbox("Choose Launch Site", ["All"] + list(df['launchpad'].unique()))
+    col1, col2 = st.columns(2)
+    year = col1.selectbox("Select Year", years)
+    site = col2.selectbox("Select Launchpad", ["All"] + list(df['launchpad'].unique()))
 
-        filtered_df = df[df['date_utc'].dt.year == selected_year]
-        if selected_site != "All":
-            filtered_df = filtered_df[filtered_df['launchpad'] == selected_site]
+    filtered_df = df[df['date_utc'].dt.year == year]
+    if site != "All":
+        filtered_df = filtered_df[filtered_df['launchpad'] == site]
 
-        success_count = filtered_df['success'].sum()
-        fail_count = len(filtered_df) - success_count
+    success = filtered_df['success'].sum()
+    failure = len(filtered_df) - success
 
-        st.markdown("### 📊 Stats")
-        col1, col2 = st.columns(2)
-        col1.metric("✅ Success", success_count)
-        col2.metric("❌ Failure", fail_count)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("✅ Successful", success)
+    with col2:
+        st.metric("❌ Failed", failure)
 
-        with st.expander("📋 Show Data Table"):
-            st.dataframe(filtered_df[['name', 'date_utc', 'success', 'launchpad']], use_container_width=True)
+    with st.expander("📋 Show Full Launch Table"):
+        st.dataframe(filtered_df[['name', 'date_utc', 'success', 'launchpad']], use_container_width=True)
 
-# ---------- Launch Map Section ----------
-elif section == "🗺️ Map":
-    st.markdown("<div class='section-header'>🗺️ Launch Sites Map</div>", unsafe_allow_html=True)
+# ===== Section 3: Launch Map =====
+elif section == "🗺️ Launch Map":
+    st.markdown("<div class='section-title'>🗺️ Launch Sites Map</div>", unsafe_allow_html=True)
 
     launchpad_coords = {
         '5e9e4502f5090995de566f86': (28.5623, -80.5774),  # CCAFS SLC 40
