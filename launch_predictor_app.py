@@ -34,13 +34,29 @@ lottie_rocket = load_lottie_url("https://assets5.lottiefiles.com/packages/lf20_i
 # ---------- UI Layout ----------
 st.set_page_config(page_title="🚀 SpaceX Launch App", layout="wide")
 
+# Custom CSS styling
+st.markdown("""
+    <style>
+    .main-title {
+        font-size: 50px;
+        font-weight: bold;
+        color: #4CAF50;
+    }
+    .section-header {
+        font-size: 30px;
+        margin-top: 40px;
+        color: #2196F3;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 with st.container():
     col1, col2 = st.columns([1, 2])
     with col1:
         st_lottie(lottie_rocket, height=180, speed=1)
     with col2:
-        st.title("🚀 SpaceX Launch Success Predictor")
-        st.markdown("Predict launch success and explore SpaceX launch history in a visual dashboard.")
+        st.markdown("<div class='main-title'>🚀 SpaceX Launch Success Predictor</div>", unsafe_allow_html=True)
+        st.markdown("Predict launch success and explore SpaceX launch history in a modern, interactive dashboard.")
 
 st.sidebar.title("🔍 Navigation")
 section = st.sidebar.radio("Choose a section", ["🚀 Predict Launch", "📊 Launch Data", "🗺️ Launch Map"])
@@ -49,7 +65,7 @@ st.sidebar.info("Made by **Tamjeed Hussain**")
 
 # ---------- Section 1: Prediction ----------
 if section == "🚀 Predict Launch":
-    st.subheader("🎯 Predict the Success of a Launch")
+    st.markdown("<div class='section-header'>🎯 Predict the Success of a Launch</div>", unsafe_allow_html=True)
     st.markdown("### Enter Payload Count:")
     payload_input = st.slider("Payload Count", min_value=1, max_value=10, value=2)
 
@@ -69,7 +85,7 @@ if section == "🚀 Predict Launch":
 
 # ---------- Section 2: Launch Data ----------
 elif section == "📊 Launch Data":
-    st.subheader("📅 SpaceX Launch Data Explorer")
+    st.markdown("<div class='section-header'>📅 SpaceX Launch Data Explorer</div>", unsafe_allow_html=True)
     df['date_utc'] = pd.to_datetime(df['date_utc'])
 
     years = sorted(df['date_utc'].dt.year.unique())
@@ -94,7 +110,7 @@ elif section == "📊 Launch Data":
 
 # ---------- Section 3: Launch Map ----------
 elif section == "🗺️ Launch Map":
-    st.subheader("🗺️ Interactive Launch Sites Map")
+    st.markdown("<div class='section-header'>🗺️ Interactive Launch Sites Map</div>", unsafe_allow_html=True)
 
     launchpad_coords = {
         '5e9e4502f5090995de566f86': (28.5623, -80.5774),  # CCAFS SLC 40
